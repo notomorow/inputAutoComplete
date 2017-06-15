@@ -1,2 +1,4 @@
-# inputAutoComplete
-a angular input autoComolete directive
+# inputAutoCompleteDirective
+a ngular input autocomplete directive
+
+@author: notomorow
