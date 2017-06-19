@@ -4,12 +4,12 @@ angular.module('inputangucomplete', [])
         var KEY_UP = 38;
         var KEY_DOWN = 40;
 
-        function keyDownEvent(scope, element, keyCode) {
-            if (keyCode != KEY_EN) {
+        function keyupEvent(scope, element, keyCode) {
+            if (keyCode !== KEY_EN) {
                 scope.isShowDropList = true;
             }
 
-            if (keyCode == KEY_EN && scope.isShowDropList) {
+            if (keyCode === KEY_EN && scope.isShowDropList) {
                 element.find('input').val(scope.rendData[scope.currentIndex].name);
                 scope.searchStr = scope.rendData[scope.currentIndex].name;
                 scope.isShowDropList = false;
@@ -18,13 +18,13 @@ angular.module('inputangucomplete', [])
             }
 
 
-            if (keyCode == KEY_DOWN) {
+            if (keyCode === KEY_DOWN) {
                 if (scope.currentIndex < scope.rendData.length - 1) {
                     scope.currentIndex++;
                 }
                 return;
             }
-            if (keyCode == KEY_UP) {
+            if (keyCode === KEY_UP) {
                 if (scope.currentIndex > 0) {
                     scope.currentIndex--;
                 }
@@ -44,18 +44,19 @@ angular.module('inputangucomplete', [])
                 maxLength: '=?',
                 matchLength: '=?',
                 disable: '=?',
-                widthStyle: '=?',
+                dropDownStyle: '=?',
                 selectedFunc: '&selectedFunc',
                 outTime: '=?',
             },
             template: "<div ng-init='init()' class='auto-complete-style'><input  type='text' ng-disabled='disable' " +
-            "autocomplete='off' ng-style='widthStyle' ng-blur='blurFn()' ng-keydown='keydownFn($event)'  " +
-            "ng-change='changeFn()' ng-model='searchStr'/><div class='angucomplete-dropdown'" +
-            "ng-show='searchStr&&isShowDropList' style='top:23px' ><div ng-click='clickFn(data)' " +
+            "autocomplete='off'  ng-blur='blurFn()' ng-focus='focusFn()' ng-keyup='keyupFn($event)'  " +
+            "ng-change='changeFn()' ng-model='searchStr'/><div class='angucomplete-dropdown' " +
+            "ng-mouseenter='mouseEnterFn()' ng-mouseleave='mouseLeaveFn()' ng-show='isShowDropList' ng-style='dropDownStyle' ><div ng-click='clickFn(data)' " +
             "ng-mouseover='overFn($index)' ng-repeat='data in rendData track by $index'" +
             " ng-class='{true: selectClass[0]+\" \"+selectClass[1], false: selectClass[0]}[$index==currentIndex]'>" +
             "<div>{{data.name}}</div></div></div></div>",
             controller: function ($scope) {
+                $scope.searchStr = '';
                 $scope.init = function () {
                     $scope.initFn({ scope: $scope });
                 }
@@ -65,12 +66,24 @@ angular.module('inputangucomplete', [])
                 scope.searchFields = scope.searchFields ? scope.searchFields : 'name,';
                 scope.isShowDropList = false;
                 scope.currentIndex = 0;
+                scope.minLength = scope.minLength ? scope.minLength : 0;
                 scope.matchLength = scope.matchLength ? scope.matchLength : 10;
                 scope.outTime = scope.outTime ? scope.outTime : 100;
                 var searchTimer;
+                var isMouseEnter;
 
+
+                scope.focusFn = function(){
+                    scope.changeFn();
+                }
                 scope.overFn = function (index) {
                     scope.currentIndex = index;
+                }
+                scope.mouseEnterFn = function () {
+                    isMouseEnter = true;
+                }
+                scope.mouseLeaveFn = function () {
+                    isMouseEnter = false;
                 }
 
                 scope.changeFn = function () {
@@ -83,7 +96,7 @@ angular.module('inputangucomplete', [])
                         var searchFields = scope.searchFields.split(',')
 
                         for (var i = 0; i < scope.localData.length; i++) {
-                            if (!scope.searchStr.length < scope.minLength || rendData.length > scope.matchLength - 1) break;
+                            if (scope.searchStr.length < scope.minLength || rendData.length > scope.matchLength - 1) break;
                             for (var j = 0; j < searchFields.length; j++) {
                                 if (scope.localData[i][searchFields[j]] && scope.localData[i][searchFields[j]].indexOf(scope.searchStr) > -1) {
                                     rendData[rendData.length] = scope.localData[i];
@@ -96,7 +109,7 @@ angular.module('inputangucomplete', [])
                         if (rendData.length === 1 && scope.autoMatch) {
                             for (var i = 0; i < searchFields.length; i++) {
                                 if (rendData[0][searchFields[i]] === scope.searchStr) {
-                                    keyDownEvent(scope, element, KEY_EN);
+                                    keyupEvent(scope, element, KEY_EN);
                                     return;
                                 }
                             }
@@ -106,20 +119,21 @@ angular.module('inputangucomplete', [])
                     }, scope.outTime);
 
                 }
-                scope.keydownFn = function (event) {
+                scope.keyupFn = function (event) {
                     if ([KEY_EN, KEY_EN, KEY_UP].indexOf(event.keyCode) > -1) {
                         event.preventDefault();
                     }
-                    keyDownEvent(scope, element, event.keyCode);
+                    keyupEvent(scope, element, event.keyCode);
 
                 }
                 scope.blurFn = function () {
-                    $timeout(function () {
+                    if (!isMouseEnter) {
                         scope.isShowDropList = false;
-                    }, 100);
+                    }
 
                 }
                 scope.clickFn = function (data) {
+                    scope.isShowDropList = false;
                     scope.searchStr = data.name;
                     element.find('input').val(data.name);
                     scope.selectedFunc({ value: { valid: true, selectObj: data } });
