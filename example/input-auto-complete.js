@@ -4,7 +4,7 @@ angular.module('inputangucomplete', [])
         var KEY_UP = 38;
         var KEY_DOWN = 40;
 
-        function keyupEvent(scope, element, keyCode) {
+        function keydownEvent(scope, element, keyCode) {
             if (keyCode !== KEY_EN) {
                 scope.isShowDropList = true;
             }
@@ -49,7 +49,7 @@ angular.module('inputangucomplete', [])
                 outTime: '=?',
             },
             template: "<div ng-init='init()' class='auto-complete-style'><input  type='text' ng-disabled='disable' " +
-            "autocomplete='off'  ng-blur='blurFn()' ng-focus='focusFn()' ng-keyup='keyupFn($event)'  " +
+            "autocomplete='off'  ng-blur='blurFn()' ng-focus='focusFn()' ng-keydown='keydownFn($event)'  " +
             "ng-change='changeFn()' ng-model='searchStr'/><div class='angucomplete-dropdown' " +
             "ng-mouseenter='mouseEnterFn()' ng-mouseleave='mouseLeaveFn()' ng-show='isShowDropList' ng-style='dropDownStyle' ><div ng-click='clickFn(data)' " +
             "ng-mouseover='overFn($index)' ng-repeat='data in rendData track by $index'" +
@@ -109,7 +109,7 @@ angular.module('inputangucomplete', [])
                         if (rendData.length === 1 && scope.autoMatch) {
                             for (var i = 0; i < searchFields.length; i++) {
                                 if (rendData[0][searchFields[i]] === scope.searchStr) {
-                                    keyupEvent(scope, element, KEY_EN);
+                                    keydownEvent(scope, element, KEY_EN);
                                     return;
                                 }
                             }
@@ -119,11 +119,11 @@ angular.module('inputangucomplete', [])
                     }, scope.outTime);
 
                 }
-                scope.keyupFn = function (event) {
+                scope.keydownFn = function (event) {
                     if ([KEY_EN, KEY_EN, KEY_UP].indexOf(event.keyCode) > -1) {
                         event.preventDefault();
                     }
-                    keyupEvent(scope, element, event.keyCode);
+                    keydownEvent(scope, element, event.keyCode);
 
                 }
                 scope.blurFn = function () {
@@ -133,7 +133,7 @@ angular.module('inputangucomplete', [])
 
                 }
                 scope.clickFn = function (data) {
-                    scope.isShowDropList = false;
+                    keydownEvent(scope, element, KEY_EN);
                     scope.searchStr = data.name;
                     element.find('input').val(data.name);
                     scope.selectedFunc({ value: { valid: true, selectObj: data } });
