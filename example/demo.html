@@ -21,13 +21,19 @@
     </style>
     <input ng-model="selectObj" required/>
     <div style="width:300px">
-        <input-auto-complete disable="bond.disabled" min-length="0" init-fn="initFn(scope)" local-data='couterparts' search-fields="name" select-class="['angucomplete-row','angucomplete-selected-row']"
-            width-style="{width:'120px'}" auto-match="true" selected-func="selectedFunc(value)">
+        <input-auto-complete drop-down-style="dropdownStyle" disable="bond.disabled" min-length="0" init-fn="initFn(scope)" local-data='couterparts' search-fields="name" select-class="['angucomplete-row','angucomplete-selected-row']"
+            width-style="{width:'120px'}" auto-match="true" selected-func="selectedFunc(value)" box-height="18">
         </input-auto-complete>
     </div>
     <script>
         var app = angular.module("myApp", ['inputangucomplete']);
         app.controller('ctrl', function ($scope) {
+           $scope.dropdownStyle = {
+                    'top': '40px',
+                    'width': '100%',
+                    'max-height': '200px',
+                    'overflow-y': 'auto'
+                };
             $scope.couterparts = [
                 { name: 'Afghanistan', code: 'AF' },
                 { name: 'Aland Islands', code: 'AX' },
